@@ -1,5 +1,6 @@
 <script lang="ts">
 	import clsx from 'clsx';
+	import { rollup } from 'd3-array';
 
 	import {
 		AppBar,
@@ -13,12 +14,22 @@
 		debounceStore,
 		TextField,
 		Paginate,
-		TablePagination
+		TablePagination,
+		SelectField
 	} from 'svelte-ux';
 	import { getCellContent } from 'svelte-ux/utils/table';
 	import { writable } from 'svelte/store';
 
 	import { mdiMagnify } from '@mdi/js';
+
+	export let teamsWithDivisions: any[];
+
+	const keys = Object.keys(teamsWithDivisions[0]);
+	const teamDivisionMap = rollup(
+		teamsWithDivisions,
+		(items) => items[0].Division,
+		(d) => d[keys[0]] // TODO: Figure out why d['License'] doesn't work
+	);
 
 	const season = '155';
 	const postSeason = '1';
@@ -29,20 +40,39 @@
 		`https://www.robotevents.com/api/seasons/${season}/skills?post_season=${postSeason}&grade_level=${gradeLevel}`,
 		{
 			disabled: $localData != null,
-			onDataChange: (data) => ($localData = data)
+			onDataChange: (data) => {
+				const dataWithDivisions = data.map((d) => ({
+					...d,
+					division: teamDivisionMap.get(d.team.team)
+				}));
+				$localData = dataWithDivisions;
+			}
 		}
 	);
-	// $: console.log($localData, $query);
+	const divisions = [...new Set($localData.map((x) => x.division))]
+		.filter((d) => d)
+		.sort()
+		.map((d) => ({
+			name: d,
+			value: d
+		}));
 
 	let search = writable('');
 	let debouncedSearch = debounceStore(search);
+	let divisionSelected: string | null = null;
 
 	$: tableData = $localData.filter((d) => {
+		let divisionMatch = true;
+		if (divisionSelected) {
+			divisionMatch = d.division === divisionSelected;
+		}
+
+		let searchMatch = true;
 		const search = $debouncedSearch?.toLowerCase();
 		if (!search || search == '') {
-			return true;
+			// return true;
 		} else {
-			return Object.values(d.team).some((value) => {
+			searchMatch = Object.values(d.team).some((value) => {
 				if (typeof value === 'string') {
 					return value.toLowerCase().includes(search);
 				}
@@ -52,14 +82,17 @@
 			// 	d.team.team.toLowerCase().includes(search) || d.team.teamName.toLowerCase().includes(search)
 			// );
 		}
+
+		return divisionMatch && searchMatch;
 	});
 </script>
 
 <AppBar title="Teams" />
 
 <main class="p-2">
-	<div class="mb-2">
+	<div class="mb-2 grid grid-cols-[1fr,auto] gap-2">
 		<TextField label="Search" icon={mdiMagnify} bind:value={$search} />
+		<SelectField label="Division" bind:value={divisionSelected} items={divisions} />
 	</div>
 
 	<Card>
@@ -105,7 +138,8 @@
 								}
 							],
 							sticky: { top: true }
-						}
+						},
+						{ name: 'division', header: 'Division', sticky: { top: true } }
 					]}
 					classes={{
 						th: 'text-xs font-medium text-secondary px-2 py-1 bg-gray-300 whitespace-nowrap text-left',

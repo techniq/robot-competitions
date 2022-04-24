@@ -16,6 +16,8 @@
     "@sveltejs/adapter-auto": "next",
     "@sveltejs/kit": "next",
     "@types/cookie": "^0.4.1",
+    "@types/d3-array": "^3.0.2",
+    "@types/d3-dsv": "^3.0.0",
     "prettier": "^2.5.1",
     "prettier-plugin-svelte": "^2.5.0",
     "svelte": "^3.46.0",
@@ -32,7 +34,9 @@
     "autoprefixer": "^10.4.4",
     "clsx": "^1.1.1",
     "cookie": "^0.4.1",
-    "svelte-ux": "^0.4.7",
+    "d3-array": "^3.1.6",
+    "d3-dsv": "^3.0.1",
+    "svelte-ux": "^0.4.8",
     "tailwindcss": "^3.0.24",
     "tailwindcss-elevation": "^1.0.1"
   }
