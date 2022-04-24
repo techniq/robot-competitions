@@ -12,7 +12,8 @@
 		remainingViewportHeight,
 		debounceStore,
 		TextField,
-		keys
+		Paginate,
+		TablePagination
 	} from 'svelte-ux';
 	import { getCellContent } from 'svelte-ux/utils/table';
 	import { writable } from 'svelte/store';
@@ -56,8 +57,8 @@
 
 <AppBar title="Teams" />
 
-<main class="p-2 grid grid-rows-[auto,1fr] gap-2">
-	<div>
+<main class="p-2">
+	<div class="mb-2">
 		<TextField label="Search" icon={mdiMagnify} bind:value={$search} />
 	</div>
 
@@ -69,76 +70,79 @@
 				offset: 8 /* bottom padding */
 			}}
 		>
-			<Table
-				data={tableData}
-				columns={[
-					{ name: 'rank', header: 'Rank', format: 'integer', sticky: { top: true } },
-					{ name: 'team.team', header: 'Number', sticky: { top: true /*, left: true*/ } },
-					{ name: 'team.teamName', header: 'Name', sticky: { top: true } },
-					{ name: 'team.city', header: 'City', sticky: { top: true } },
-					{ name: 'team.region', header: 'Region', sticky: { top: true } },
-					{ name: 'team.country', header: 'Country', sticky: { top: true } },
-					// { name: 'team.link', header: 'link', sticky: { top: true } }
-					{
-						name: 'scores',
-						header: 'Scores',
-						columns: [
-							{
-								name: 'scores.maxDriver',
-								header: 'Driver',
-								format: 'integer',
-								sticky: { top: true }
-							},
-							{
-								name: 'scores.maxProgramming',
-								header: 'Program',
-								format: 'integer',
-								sticky: { top: true }
-							},
-							{
-								name: 'scores.score',
-								header: 'Total',
-								format: 'integer',
-								sticky: { top: true }
-							}
-						],
-						sticky: { top: true }
-					}
-				]}
-				classes={{
-					th: 'text-xs font-medium text-secondary px-2 py-1 bg-gray-300 whitespace-nowrap text-left',
-					td: 'text-sm px-2 cursor-pointer border-r border-b border-gray-300 whitespace-nowrap'
-				}}
-				styles={{
-					th: 'box-shadow: inset 0 0 0 0.5px var(--color-gray-400);'
-				}}
-			>
-				<tbody slot="data" let:data let:columns={rowColumns}>
-					{#each data ?? [] as rowData, rowIndex}
-						<tr
-							on:click={(e) => {
-								// selected = rowData;
-							}}
-						>
-							{#each rowColumns as column}
-								<td
-									use:tableCell={{ column, rowData, rowIndex }}
-									class={clsx(
-										'text-sm px-2 cursor-pointer border-r border-b border-gray-300 whitespace-nowrap h-7',
-										(column.sticky?.left || column.sticky?.right) && 'bg-white'
-									)}
-								>
-									{#if column.name === 'team.link'}
-										TODO
-									{:else}
-										{getCellContent(column, rowData, rowIndex)}
-									{/if}
-								</td>
-							{/each}
-						</tr>
-					{/each}
-				</tbody>
-			</Table>
+			<Paginate items={tableData} perPage={100} let:pagination let:pageItems>
+				<Table
+					data={pageItems}
+					columns={[
+						{ name: 'rank', header: 'Rank', format: 'integer', sticky: { top: true } },
+						{ name: 'team.team', header: 'Number', sticky: { top: true /*, left: true*/ } },
+						{ name: 'team.teamName', header: 'Name', sticky: { top: true } },
+						{ name: 'team.city', header: 'City', sticky: { top: true } },
+						{ name: 'team.region', header: 'Region', sticky: { top: true } },
+						{ name: 'team.country', header: 'Country', sticky: { top: true } },
+						// { name: 'team.link', header: 'link', sticky: { top: true } }
+						{
+							name: 'scores',
+							header: 'Scores',
+							columns: [
+								{
+									name: 'scores.maxDriver',
+									header: 'Driver',
+									format: 'integer',
+									sticky: { top: true }
+								},
+								{
+									name: 'scores.maxProgramming',
+									header: 'Program',
+									format: 'integer',
+									sticky: { top: true }
+								},
+								{
+									name: 'scores.score',
+									header: 'Total',
+									format: 'integer',
+									sticky: { top: true }
+								}
+							],
+							sticky: { top: true }
+						}
+					]}
+					classes={{
+						th: 'text-xs font-medium text-secondary px-2 py-1 bg-gray-300 whitespace-nowrap text-left',
+						td: 'text-sm px-2 cursor-pointer border-r border-b border-gray-300 whitespace-nowrap'
+					}}
+					styles={{
+						th: 'box-shadow: inset 0 0 0 0.5px var(--color-gray-400);'
+					}}
+				>
+					<tbody slot="data" let:data let:columns={rowColumns}>
+						{#each data ?? [] as rowData, rowIndex}
+							<tr
+								on:click={(e) => {
+									// selected = rowData;
+								}}
+							>
+								{#each rowColumns as column}
+									<td
+										use:tableCell={{ column, rowData, rowIndex }}
+										class={clsx(
+											'text-sm px-2 cursor-pointer border-r border-b border-gray-300 whitespace-nowrap h-7',
+											(column.sticky?.left || column.sticky?.right) && 'bg-white'
+										)}
+									>
+										{#if column.name === 'team.link'}
+											TODO
+										{:else}
+											{getCellContent(column, rowData, rowIndex)}
+										{/if}
+									</td>
+								{/each}
+							</tr>
+						{/each}
+					</tbody>
+				</Table>
+				<TablePagination {pagination} class="sticky bottom-0 left-0 bg-white" />
+			</Paginate>
 		</div>
 	</Card>
 </main>
