@@ -91,7 +91,7 @@
 
 <main class="p-2">
 	<div class="mb-2 grid grid-cols-[1fr,auto] gap-2">
-		<TextField label="Search" icon={mdiMagnify} bind:value={$search} />
+		<TextField label="Search" icon={mdiMagnify} bind:value={$search} clearable />
 		<SelectField label="Division" bind:value={divisionSelected} items={divisions} />
 	</div>
 
